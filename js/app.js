@@ -39,6 +39,27 @@ const App = (() => {
 
     const quiz = new Quiz([q1, q2, q3, q4, q5]);
 
+    const listeners = _ => {
+        nextButtonEl.addEventListener("click", function () {
+            const selectedRadioEl = document.querySelector('input[name="choice"]:checked');
+            console.log(selectedRadioEl);
+            if (selectedRadioEl) {
+                const key = Number(selectedRadioEl.getAttribute("data-order"));
+                quiz.guess(key);
+                renderAll();
+            }
+        });
+        restartButtonEl.addEventListener("click", function () {
+            console.log("clicked restart");
+            /* 1. reset the quiz
+            * 2. renderAll
+            * 3. restore the next button*/
+            quiz.reset();
+            renderAll();
+            nextButtonEl.style.opacity = 1;
+        });
+    };
+
     const setValue = (elem, value) => {
         elem.innerHTML = value;
     };
@@ -78,7 +99,6 @@ const App = (() => {
         // 2. create function that goes from 0 to width
         launch(0, currentWidth);
     };
-    renderProgress();
 
     const launch = (width, maxPercent) => {
         let loadingBar = setInterval(function () {
@@ -91,9 +111,17 @@ const App = (() => {
         }, 3);
     };
 
+    const renderEndScreen = _ => {
+        setValue(quizQuestionEl, 'Great Job');
+        setValue(taglineEl, `Complete`);
+        setValue(trackerEl, `Your score: ${getPercentage(quiz.score, quiz.questions.length)}%`);
+        nextButtonEl.style.opacity = 0;
+        renderProgress();
+    };
     const renderAll = _ => {
         if (quiz.hasEnded()) {
             //render end screen
+            renderEndScreen();
         } else {
             // 1. render the question
             // 2. render the choices elements
@@ -105,8 +133,14 @@ const App = (() => {
             renderProgress();
         }
     };
-    renderAll();
+    return {
+        renderAll: renderAll,
+        listeners: listeners
+    };
 })();
+
+App.renderAll();
+App.listeners();
 
 /*
 const App = (() => {
